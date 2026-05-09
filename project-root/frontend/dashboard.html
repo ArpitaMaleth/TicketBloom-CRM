@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TicketBloom Dashboard</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF6699; /* Strong, premium pink */
+            --primary-light: #FFB3CC;
+            --bg-color: #FFF2F5; /* Very soft pink background */
+            --text-dark: #331A22;
+            --text-muted: #886673;
+            --card-bg: rgba(255, 255, 255, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --shadow: 0 8px 32px rgba(255, 102, 153, 0.08); /* Pink-tinted shadow */
+        }
+
+        * { box-sizing: border-box; }
+
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background: var(--bg-color); 
+            color: var(--text-dark); 
+            margin: 0; 
+            padding: 0; 
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Decorative Background Shapes */
+        .bg-shape {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: 0;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        .shape-1 {
+            top: -100px;
+            left: -100px;
+            width: 400px;
+            height: 400px;
+            background: var(--primary);
+        }
+        .shape-2 {
+            bottom: -150px;
+            right: 10%;
+            width: 500px;
+            height: 500px;
+            background: #FFA166; /* Warm orange to blend with pink */
+        }
+        .shape-3 {
+            top: 20%;
+            right: -50px;
+            width: 300px;
+            height: 300px;
+            background: #FF99CC;
+        }
+
+        /* App Layout wrapper */
+        .app-container {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.35); /* Glass overlay over whole screen */
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+        }
+
+        /* Sidebar container (Left Menu) */
+        .sidebar {
+            width: 260px;
+            background: rgba(255, 255, 255, 0.6);
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            padding: 40px 24px;
+        }
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 50px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-left: 10px;
+        }
+        .nav-menu {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .nav-item {
+            padding: 14px 20px;
+            border-radius: 12px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s;
+        }
+        .nav-item.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 102, 153, 0.4);
+        }
+        .nav-item:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.8);
+            color: var(--primary);
+        }
+
+        .btn-logout {
+            margin-top: auto;
+            background: transparent;
+            border: 2px solid var(--primary-light);
+            color: var(--primary);
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-logout:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            padding: 50px 60px;
+            overflow-y: auto;
+        }
+        
+        .top-bar {
+            margin-bottom: 40px;
+        }
+        .top-bar h2 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--text-dark);
+            letter-spacing: -0.5px;
+        }
+        .top-bar p {
+            margin: 5px 0 0 0;
+            color: var(--text-muted);
+        }
+
+        /* Glass Cards for everything */
+        .glass-card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        /* Stats Grid */
+        .stats { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 24px; 
+            margin-bottom: 40px; 
+        }
+        .stat-box { 
+            padding: 24px; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: transform 0.3s;
+        }
+        .stat-box:hover { transform: translateY(-5px); }
+        .stat-box h3 { margin: 0; font-size: 14px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;}
+        .stat-box h2 { margin: 10px 0 0 0; font-size: 36px; font-weight: 700; color: var(--text-dark); }
+        
+        /* Status Colors mapped directly to numbers */
+        .stat-box:nth-child(2) h2 { color: #FF9F43; } /* Orange/Open */
+        .stat-box:nth-child(3) h2 { color: #54A0FF; } /* Blue/Progress */
+        .stat-box:nth-child(4) h2 { color: #1DD1A1; } /* Green/Closed */
+
+        /* Content Layout (Form & Tickets) */
+        .dashboard-layout { 
+            display: grid; 
+            grid-template-columns: 1fr 2fr; 
+            gap: 30px; 
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .dashboard-layout { grid-template-columns: 1fr; }
+        }
+
+        /* Form Area */
+        .create-form { 
+            padding: 30px; 
+            position: sticky; 
+            top: 50px; 
+        }
+        .create-form h3 { margin: 0 0 20px 0; font-weight: 600; font-size: 20px;}
+        
+        .form-group { margin-bottom: 20px; }
+        .form-group input, .form-group textarea { 
+            width: 100%; padding: 14px 18px; 
+            background: rgba(255,255,255,0.9);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 12px; 
+            color: var(--text-dark); 
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s;
+            outline: none;
+        }
+        .form-group input:focus, .form-group textarea:focus {
+            border-color: var(--primary-light);
+            background: #FFFFFF;
+            box-shadow: 0 0 0 4px rgba(255, 102, 153, 0.1);
+        }
+        
+        .btn-submit { 
+            background: linear-gradient(135deg, var(--primary), #FF85AD);
+            color: white; border: none; padding: 14px; 
+            border-radius: 12px; cursor: pointer; font-weight: 600; 
+            font-family: inherit; font-size: 15px; width: 100%;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(255, 102, 153, 0.3);
+        }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 102, 153, 0.4); }
+
+        /* Tickets Area */
+        .ticket-list { display: flex; flex-direction: column; gap: 20px; }
+        
+        /* Grid for All Tickets */
+        .ticket-list.grid-view {
+            grid-column: 1 / -1; /* Take up the entire row */
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 24px;
+            align-items: start;
+        }
+
+        .ticket-card { padding: 30px; transition: transform 0.3s; }
+        .ticket-card:hover { transform: translateY(-3px); border-color: rgba(255, 102, 153, 0.3); }
+        
+        .ticket-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .ticket-header h4 { margin: 0; font-size: 18px; font-weight: 600; color: var(--text-dark); }
+        
+        .ticket-desc { margin: 0 0 20px 0; color: var(--text-muted); line-height: 1.6; font-size: 14px; }
+        .ticket-date { color: #B39CA5; font-size: 12px; font-weight: 500; display: block; margin-top: 15px;}
+        
+        .ticket-actions { margin-top: 20px; display: flex; gap: 10px; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 20px;}
+        
+        .btn-action {
+            border: none; padding: 8px 16px; border-radius: 8px; font-weight: 500; font-family: inherit; font-size: 13px; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-warning { background: #FFF0E0; color: #FF9F43; }
+        .btn-warning:hover { background: #FFE0C2; }
+        .btn-success { background: #E3F8F0; color: #1DD1A1; }
+        .btn-success:hover { background: #C8F0E1; }
+
+        /* Status Badges */
+        .badge { 
+            padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .badge.open { color: #FF9F43; background: #FFF0E0; }
+        .badge.in-progress { 
+            color: white; 
+            background: #54A0FF; 
+            animation: pulse-badge 1.5s infinite;
+        }
+        .badge.closed { color: #1DD1A1; background: #E3F8F0; }
+
+        @keyframes pulse-badge {
+            0% { box-shadow: 0 0 0 0 rgba(84, 160, 255, 0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(84, 160, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(84, 160, 255, 0); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Decorative background shapes blending seamlessly to give depth -->
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+    <div class="bg-shape shape-3"></div>
+
+    <div class="app-container">
+        
+        <!-- Left Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo">
+                🌸 TicketBloom
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    Dashboard
+                </a>
+                <a href="#" class="nav-item">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    All Tickets
+                </a>
+                <a href="#" class="nav-item">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    Settings
+                </a>
+            </nav>
+
+            <button id="logoutBtn" class="btn-logout">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                Logout
+            </button>
+        </aside>
+
+        <!-- Main Content (Right Side) -->
+        <main class="main-content">
+            <div class="top-bar">
+                <h2>Dashboard Overview</h2>
+                <p>Welcome to TicketBloom! Track and manage all your tasks.</p>
+            </div>
+
+            <!-- Dashboard Stats -->
+            <div class="stats">
+                <div class="stat-box glass-card">
+                    <h3>Total Tickets</h3>
+                    <h2 id="total-count">0</h2>
+                </div>
+                <div class="stat-box glass-card">
+                    <h3>Open</h3>
+                    <h2 id="open-count">0</h2>
+                </div>
+                <div class="stat-box glass-card">
+                    <h3>In Progress</h3>
+                    <h2 id="in-progress-count">0</h2>
+                </div>
+                <div class="stat-box glass-card">
+                    <h3>Completed</h3>
+                    <h2 id="closed-count">0</h2>
+                </div>
+            </div>
+
+            <div class="dashboard-layout">
+                <!-- Customer Create Form -->
+                <div class="create-form glass-card" id="createTicketSection" style="display: none;">
+                    <h3>Raise a Ticket</h3>
+                    <form id="ticketForm">
+                        <div class="form-group">
+                            <input type="text" id="ticketTitle" placeholder="Brief Title (e.g., App crashes)" required>
+                        </div>
+                        <div class="form-group">
+                            <textarea id="ticketDesc" rows="5" placeholder="Describe your issue in detail..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn-submit">Submit Ticket</button>
+                    </form>
+                </div>
+
+                <!-- Ticket List Container -->
+                <div class="ticket-list" id="ticketList">
+                    <p class="text-muted" style="text-align:center; padding: 40px 0;">Loading your tickets...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
+            <h3>Raise a Ticket</h3>
+            <form id="ticketForm">
+                <div class="form-group">
+                    <input type="text" id="ticketTitle" placeholder="Brief Title (e.g., App crashes)" required>
+                </div>
+                <div class="form-group">
+                    <textarea id="ticketDesc" rows="5" placeholder="Describe your issue in detail..." required></textarea>
+                </div>
+                <button type="submit" class="btn">Submit Ticket</button>
+            </form>
+        </div>
+
+        <!-- Ticket List Container -->
+        <div class="ticket-list" id="ticketList">
+            <!-- Tickets will inject here via JS -->
+            <p class="text-muted" style="text-align:center;">Loading your tickets...</p>
+        </div>
+    </div>
+
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
